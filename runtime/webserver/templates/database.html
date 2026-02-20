@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Data History — Minimal-PLC{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+  <h1 style="color:var(--accent)">
+    <i class="fa fa-database me-2"></i>Data History
+  </h1>
+  <button class="btn btn-outline-secondary btn-sm" onclick="exportCsv()">
+    <i class="fa fa-download me-1"></i>Export CSV
+  </button>
+</div>
+
+<!-- Stats row -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="mp-card h-100">
+      <h6>DB File Size</h6>
+      <div class="stat-value" style="font-size:1.4rem" id="dbSize">—</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="mp-card h-100">
+      <h6>Total Records</h6>
+      <div class="stat-value" id="totalRecords">—</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="mp-card h-100">
+      <h6>Oldest Record</h6>
+      <div class="stat-value" style="font-size:1rem" id="oldestRecord">—</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="mp-card h-100">
+      <h6>Retention Policy</h6>
+      <div class="stat-value" style="font-size:1.2rem" id="retentionDays">30 days</div>
+    </div>
+  </div>
+</div>
+
+<!-- Time filter -->
+<div class="mp-card mb-3">
+  <div class="btn-group" role="group" id="timeFilter">
+    <button type="button" class="btn btn-outline-secondary btn-sm active" data-h="1">1H</button>
+    <button type="button" class="btn btn-outline-secondary btn-sm" data-h="24">24H</button>
+    <button type="button" class="btn btn-outline-secondary btn-sm" data-h="168">7D</button>
+    <button type="button" class="btn btn-outline-secondary btn-sm" data-h="720">30D</button>
+  </div>
+</div>
+
+<!-- History table -->
+<div class="mp-card">
+  <h6 class="mb-3">Point History</h6>
+  <div class="table-responsive">
+    <table class="table table-dark table-sm table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Point Name</th>
+          <th>Value</th>
+          <th>Unit</th>
+          <th>Quality</th>
+        </tr>
+      </thead>
+      <tbody id="historyBody">
+        <tr><td colspan="5" class="text-center text-muted">No history data</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let currentHours = 1;
+
+  document.querySelectorAll('#timeFilter button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#timeFilter button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentHours = parseInt(btn.dataset.h);
+      loadHistory();
+    });
+  });
+
+  function loadHistory() {
+    // TODO: fetch history from /api/history?hours=X when endpoint is implemented
+    document.getElementById('historyBody').innerHTML =
+      '<tr><td colspan="5" class="text-center text-muted">No data for selected period</td></tr>';
+  }
+
+  function exportCsv() {
+    alert('CSV export — feature coming soon.');
+  }
+
+  loadHistory();
+</script>
+{% endblock %}

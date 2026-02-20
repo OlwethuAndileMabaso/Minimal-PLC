@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "interface": "eth0",
+  "device_instance": 999,
+  "port": 47808,
+  "bbmd_address": "",
+  "bbmd_ttl": 900,
+  "max_apdu_length": 1024,
+  "scan_timeout_seconds": 30
+}

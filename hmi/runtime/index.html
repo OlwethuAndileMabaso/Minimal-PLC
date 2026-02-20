@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Minimal-PLC HMI</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+  <style>
+    :root {
+      --bg-primary:   #0d1117;
+      --bg-secondary: #161b22;
+      --bg-card:      #1c2128;
+      --accent:       #00d4ff;
+      --text:         #e6edf3;
+      --border:       #30363d;
+    }
+
+    html, body {
+      margin: 0; padding: 0;
+      width: 100vw; height: 100vh;
+      overflow: hidden;
+      background: var(--bg-primary);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    /* ── Top bar ── */
+    #topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 40px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 .75rem;
+      z-index: 100;
+    }
+    #topbar .brand { font-weight: 700; color: var(--accent); font-size: .9rem; }
+    #topbar .clock {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      font-size: .85rem;
+      font-variant-numeric: tabular-nums;
+    }
+    #topbar .conn-area { margin-left: auto; display: flex; align-items: center; gap: .4rem; font-size: .8rem; }
+    .conn-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #ef4444;
+    }
+    .conn-dot.connected { background: #3fb950; }
+
+    /* ── Canvas ── */
+    #canvas {
+      position: absolute;
+      top: 40px; left: 0; right: 0; bottom: 0;
+      background: var(--bg-primary);
+      overflow: hidden;
+    }
+
+    /* ── Reconnecting overlay ── */
+    #reconnectOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(13,17,23,.85);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 1rem;
+      font-size: 1.2rem;
+    }
+    #reconnectOverlay.show { display: flex; }
+
+    /* ── Alarm banner ── */
+    #alarmBanner {
+      position: fixed;
+      top: 44px; left: 1rem; right: 1rem;
+      z-index: 150;
+      display: none;
+    }
+
+    /* ── Widget styles ── */
+    .hmi-widget {
+      position: absolute;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: .5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: .8rem;
+      text-align: center;
+      min-touch-action: manipulation;
+    }
+    .wgt-title { font-size: .7rem; color: #8b949e; margin-bottom: .2rem; }
+    .wgt-value { font-size: 1.4rem; font-weight: 700; }
+    .wgt-icon  { font-size: 1.4rem; }
+  </style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div id="topbar">
+  <span class="brand">⚡ Minimal-PLC</span>
+  <span class="clock" id="clock">--:--:--</span>
+  <div class="conn-area">
+    <span class="conn-dot" id="connDot"></span>
+    <span id="connText">Connecting…</span>
+  </div>
+</div>
+
+<!-- Alarm banner -->
+<div id="alarmBanner"></div>
+
+<!-- Reconnecting overlay -->
+<div id="reconnectOverlay">
+  <div style="font-size:2rem">⚡</div>
+  <div>RECONNECTING…</div>
+  <div class="spinner-border" style="width:2rem;height:2rem;border-color:var(--accent);border-right-color:transparent;"></div>
+</div>
+
+<!-- Canvas -->
+<div id="canvas"></div>
+
+<script>
+  // ── Clock ──────────────────────────────────────────────────────────────
+  function updateClock() {
+    document.getElementById('clock').textContent =
+      new Date().toLocaleTimeString();
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // ── Widget rendering ───────────────────────────────────────────────────
+  const ICONS = {
+    gauge: '📊', value: '🔢', chart: '📈',
+    status: '🔴', button: '🔘', label: '🏷️', alarms: '🚨'
+  };
+
+  function renderWidget(w) {
+    const el = document.createElement('div');
+    el.className = 'hmi-widget';
+    el.id = 'wgt_' + w.id;
+    el.dataset.source = w.data_source || '';
+    el.style.left   = (w.x || 0) + 'px';
+    el.style.top    = (w.y || 0) + 'px';
+    el.style.width  = (w.width  || 120) + 'px';
+    el.style.height = (w.height || 80)  + 'px';
+    el.style.borderColor = w.color || '#30363d';
+
+    el.innerHTML = `
+      <div class="wgt-icon">${ICONS[w.type] || '▪'}</div>
+      <div class="wgt-title">${w.title || w.type}</div>
+      <div class="wgt-value" style="color:${w.color || '#00d4ff'}">—</div>`;
+    document.getElementById('canvas').appendChild(el);
+  }
+
+  function loadLayout() {
+    fetch('/api/hmi/layout')
+      .then(r => r.json())
+      .then(layout => {
+        const canvas = document.getElementById('canvas');
+        canvas.innerHTML = '';
+        const page = (layout.pages && layout.pages[0]) || { widgets: layout.widgets || [] };
+        (page.widgets || []).forEach(renderWidget);
+      })
+      .catch(e => {
+        console.warn('Could not load layout from server, using localStorage:', e);
+        try {
+          const saved = JSON.parse(localStorage.getItem('hmi_layout') || '{}');
+          const page = (saved.pages && saved.pages[0]) || { widgets: [] };
+          (page.widgets || []).forEach(renderWidget);
+        } catch (ex) { /* ignore */ }
+      });
+  }
+
+  loadLayout();
+
+  // ── Socket.IO ──────────────────────────────────────────────────────────
+  const connDot  = document.getElementById('connDot');
+  const connText = document.getElementById('connText');
+  const overlay  = document.getElementById('reconnectOverlay');
+
+  let reconnectTimer = null;
+
+  function setConnected(ok) {
+    connDot.classList.toggle('connected', ok);
+    connText.textContent = ok ? 'Connected' : 'Disconnected';
+    overlay.classList.toggle('show', !ok);
+  }
+
+  const socket = io({ transports: ['websocket'], reconnection: false });
+
+  socket.on('connect', () => {
+    setConnected(true);
+    clearTimeout(reconnectTimer);
+  });
+
+  socket.on('disconnect', () => {
+    setConnected(false);
+    reconnectTimer = setTimeout(() => socket.connect(), 5000);
+  });
+
+  socket.on('point_update', (data) => {
+    document.querySelectorAll('.hmi-widget').forEach(el => {
+      if (el.dataset.source && el.dataset.source === data.name) {
+        const valEl = el.querySelector('.wgt-value');
+        if (valEl) valEl.textContent = data.last_value ?? '—';
+      }
+    });
+  });
+
+  socket.on('alarm', (data) => {
+    const banner = document.getElementById('alarmBanner');
+    banner.innerHTML = `
+      <div class="alert alert-danger alert-dismissible mb-0 py-2 px-3" role="alert">
+        <strong>🚨 ALARM:</strong> ${data.message || 'Alarm triggered'}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>`;
+    banner.style.display = '';
+    setTimeout(() => { banner.style.display = 'none'; banner.innerHTML = ''; }, 5000);
+  });
+
+  socket.on('hmi_deployed', () => {
+    // Reload layout when a new deploy is pushed
+    setTimeout(loadLayout, 500);
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

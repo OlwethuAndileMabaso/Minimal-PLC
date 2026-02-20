@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}Network &amp; Settings — Minimal-PLC{% endblock %}
+
+{% block content %}
+<h1 class="mb-4" style="color:var(--accent)">
+  <i class="fa fa-sliders me-2"></i>Network &amp; Settings
+</h1>
+
+<form id="settingsForm">
+
+  <!-- Platform Settings -->
+  <div class="mp-card mb-4">
+    <h6 class="mb-3"><i class="fa fa-gear me-1"></i>Platform Settings</h6>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Platform Name</label>
+        <input type="text" class="form-control" id="platform_name"
+               value="{{ platform_cfg.get('platform_name', 'Minimal-PLC') }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Web Port</label>
+        <input type="number" class="form-control" id="web_port"
+               value="{{ platform_cfg.get('web_port', 8080) }}">
+      </div>
+      <div class="col-md-3 d-flex align-items-end">
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="debug_mode"
+                 {% if platform_cfg.get('debug') %}checked{% endif %}>
+          <label class="form-check-label">Debug Mode</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BACnet Settings -->
+  <div class="mp-card mb-4">
+    <h6 class="mb-3"><i class="fa fa-network-wired me-1"></i>BACnet Settings</h6>
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Interface</label>
+        <input type="text" class="form-control" id="bacnet_interface"
+               value="{{ bacnet_cfg.get('interface', 'eth0') }}" placeholder="eth0">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Device Instance</label>
+        <input type="number" class="form-control" id="bacnet_device_instance"
+               value="{{ bacnet_cfg.get('device_instance', 999) }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">BACnet Port</label>
+        <input type="number" class="form-control" id="bacnet_port"
+               value="{{ bacnet_cfg.get('port', 47808) }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">BBMD Address</label>
+        <input type="text" class="form-control" id="bbmd_address"
+               value="{{ bacnet_cfg.get('bbmd_address', '') }}" placeholder="optional">
+      </div>
+    </div>
+  </div>
+
+  <!-- OpenPLC Connection -->
+  <div class="mp-card mb-4">
+    <h6 class="mb-3"><i class="fa fa-microchip me-1"></i>OpenPLC Connection</h6>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Host</label>
+        <input type="text" class="form-control" id="plc_host"
+               value="{{ plc_cfg.get('host', 'localhost') }}">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Port</label>
+        <input type="number" class="form-control" id="plc_port"
+               value="{{ plc_cfg.get('port', 8080) }}">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">API Token</label>
+        <input type="password" class="form-control" id="plc_token"
+               value="{{ plc_cfg.get('api_token', '') }}">
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="plc_enabled"
+                 {% if plc_cfg.get('enabled') %}checked{% endif %}>
+          <label class="form-check-label">Enable</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Database -->
+  <div class="mp-card mb-4">
+    <h6 class="mb-3"><i class="fa fa-database me-1"></i>Database</h6>
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Type</label>
+        <select class="form-select" id="db_type">
+          <option value="sqlite" selected>SQLite</option>
+          <option value="postgresql">PostgreSQL</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">DB Path</label>
+        <input type="text" class="form-control" id="db_path"
+               value="database/minimal_plc.db">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Retention (days)</label>
+        <input type="number" class="form-control" id="retention_days"
+               value="{{ platform_cfg.get('data_retention_days', 30) }}">
+      </div>
+    </div>
+  </div>
+
+  <button type="button" class="btn btn-accent" onclick="saveSettings()">
+    <i class="fa fa-floppy-disk me-1"></i>Save Settings
+  </button>
+  <span id="saveMsg" class="ms-3 small"></span>
+
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function saveSettings() {
+    const data = {
+      platform_name:  document.getElementById('platform_name').value,
+      web_port:       parseInt(document.getElementById('web_port').value),
+      debug:          document.getElementById('debug_mode').checked,
+      bacnet: {
+        interface:       document.getElementById('bacnet_interface').value,
+        device_instance: parseInt(document.getElementById('bacnet_device_instance').value),
+        port:            parseInt(document.getElementById('bacnet_port').value),
+        bbmd_address:    document.getElementById('bbmd_address').value,
+      },
+      openplc: {
+        host:      document.getElementById('plc_host').value,
+        port:      parseInt(document.getElementById('plc_port').value),
+        api_token: document.getElementById('plc_token').value,
+        enabled:   document.getElementById('plc_enabled').checked,
+      },
+      retention_days: parseInt(document.getElementById('retention_days').value),
+    };
+
+    fetch('/api/config/network', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data),
+    })
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById('saveMsg').textContent =
+        d.ok ? '✅ Saved' : '❌ Error saving';
+    })
+    .catch(e => {
+      document.getElementById('saveMsg').textContent = '❌ ' + e;
+    });
+  }
+</script>
+{% endblock %}

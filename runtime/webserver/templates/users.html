@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}User Management — Minimal-PLC{% endblock %}
+
+{% block content %}
+<h1 class="mb-4" style="color:var(--accent)">
+  <i class="fa fa-users me-2"></i>User Management
+</h1>
+
+<!-- Users table -->
+<div class="mp-card mb-4">
+  <h6 class="mb-3"><i class="fa fa-list me-1"></i>Users</h6>
+  <div class="table-responsive">
+    <table class="table table-dark table-sm table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Role</th>
+          <th>Email</th>
+          <th>Last Login</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr>
+          <td><i class="fa fa-user-circle me-1" style="color:#8b949e"></i>{{ user.username }}</td>
+          <td>
+            {% if user.role == 'admin' %}
+              <span class="badge bg-danger">Admin</span>
+            {% elif user.role == 'engineer' %}
+              <span class="badge bg-warning text-dark">Engineer</span>
+            {% elif user.role == 'operator' %}
+              <span class="badge bg-primary">Operator</span>
+            {% else %}
+              <span class="badge bg-secondary">Viewer</span>
+            {% endif %}
+          </td>
+          <td>{{ user.email or '—' }}</td>
+          <td><small>{{ user.last_login or 'Never' }}</small></td>
+          <td>
+            {% if user.active %}
+              <span class="badge bg-success">Active</span>
+            {% else %}
+              <span class="badge bg-secondary">Inactive</span>
+            {% endif %}
+          </td>
+          <td>
+            <button class="btn btn-sm btn-outline-secondary me-1"
+                    onclick="editUser({{ user.id }}, '{{ user.username }}')">
+              <i class="fa fa-pen"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger"
+                    onclick="deleteUser({{ user.id }}, '{{ user.username }}')">
+              <i class="fa fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-center text-muted">No users found</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add User card -->
+<div class="mp-card">
+  <h6 class="mb-3"><i class="fa fa-user-plus me-1"></i>Add User</h6>
+  <div class="row g-3">
+    <div class="col-md-3">
+      <label class="form-label">Username</label>
+      <input type="text" class="form-control" id="newUsername" placeholder="jdoe">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Password</label>
+      <input type="password" class="form-control" id="newPassword">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Role</label>
+      <select class="form-select" id="newRole">
+        <option value="admin">Admin</option>
+        <option value="engineer">Engineer</option>
+        <option value="operator" selected>Operator</option>
+        <option value="viewer">Viewer</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Email</label>
+      <input type="email" class="form-control" id="newEmail" placeholder="jdoe@example.com">
+    </div>
+    <div class="col-12">
+      <button class="btn btn-accent" onclick="addUser()">
+        <i class="fa fa-user-plus me-1"></i>Add User
+      </button>
+      <span id="addUserMsg" class="ms-3 small"></span>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function addUser() {
+    const username = document.getElementById('newUsername').value.trim();
+    const password = document.getElementById('newPassword').value;
+    const role     = document.getElementById('newRole').value;
+    const email    = document.getElementById('newEmail').value.trim();
+    const msg      = document.getElementById('addUserMsg');
+
+    if (!username || !password) {
+      msg.textContent = 'Username and password are required.';
+      return;
+    }
+
+    // TODO: POST to /api/users/add when endpoint is implemented
+    msg.textContent = '✅ User added (demo) — page will reload.';
+    setTimeout(() => location.reload(), 1200);
+  }
+
+  function editUser(id, username) {
+    alert('Edit user ' + username + ' (id=' + id + ') — feature coming soon.');
+  }
+
+  function deleteUser(id, username) {
+    if (!confirm('Delete user ' + username + '?')) return;
+    // TODO: DELETE /api/users/:id when endpoint is implemented
+    alert('Delete user ' + username + ' (demo) — feature coming soon.');
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,8 @@
+{
+  "interface": "eth0",
+  "platform_ip": "0.0.0.0",
+  "platform_port": 8080,
+  "enable_https": false,
+  "ssl_cert": "",
+  "ssl_key": ""
+}

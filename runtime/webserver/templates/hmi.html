@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}HMI Designer — Minimal-PLC{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+  <h1 style="color:var(--accent)">
+    <i class="fa fa-desktop me-2"></i>HMI Designer
+  </h1>
+  <div class="d-flex gap-2">
+    <button class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('hmiFrame').contentWindow.location.reload()">
+      <i class="fa fa-rotate me-1"></i>Reload
+    </button>
+    <a href="/hmi/runtime" target="_blank" class="btn btn-outline-primary btn-sm">
+      <i class="fa fa-eye me-1"></i>Open Runtime
+    </a>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="mp-card mb-3 py-2">
+  <div class="d-flex flex-wrap gap-2">
+    <button class="btn btn-sm btn-outline-secondary" onclick="hmiCmd('new')">
+      <i class="fa fa-file me-1"></i>New Screen
+    </button>
+    <button class="btn btn-sm btn-outline-secondary" onclick="hmiCmd('save')">
+      <i class="fa fa-floppy-disk me-1"></i>Save
+    </button>
+    <button class="btn btn-sm btn-outline-secondary" onclick="hmiCmd('preview')">
+      <i class="fa fa-eye me-1"></i>Preview
+    </button>
+    <button class="btn btn-sm btn-accent" onclick="hmiCmd('deploy')">
+      <i class="fa fa-rocket me-1"></i>Deploy to Runtime
+    </button>
+  </div>
+</div>
+
+<!-- Embedded designer -->
+<iframe id="hmiFrame" src="/hmi/designer/"
+  style="width:100%;height:calc(100vh - 220px);border:none;border-radius:8px;background:var(--bg-card);">
+</iframe>
+
+<p class="text-muted small mt-2">
+  <i class="fa fa-circle-info me-1"></i>
+  Design your HMI screen above. Click <strong>Deploy to Runtime</strong> to push it to the operator display.
+</p>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function hmiCmd(cmd) {
+    const frame = document.getElementById('hmiFrame');
+    try {
+      frame.contentWindow.postMessage({cmd}, '*');
+    } catch (e) {
+      console.warn('HMI cmd failed:', e);
+    }
+  }
+</script>
+{% endblock %}

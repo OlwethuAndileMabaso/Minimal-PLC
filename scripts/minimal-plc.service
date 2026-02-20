@@ -1,0 +1,17 @@
+[Unit]
+Description=Minimal-PLC Industrial HMI Platform
+After=network.target
+
+[Service]
+Type=simple
+User=minimalplc
+WorkingDirectory=/opt/minimal-plc
+ExecStart=/opt/minimal-plc/venv/bin/python runtime/webserver/server.py
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

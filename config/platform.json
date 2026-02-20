@@ -1,0 +1,17 @@
+{
+  "platform_name": "Minimal-PLC",
+  "version": "1.0.0",
+  "web_port": 8080,
+  "debug": false,
+  "secret_key": "change-this-in-production",
+  "session_timeout_minutes": 60,
+  "data_retention_days": 30,
+  "poll_interval_seconds": 5,
+  "auto_discover_bacnet": true,
+  "openplc": {
+    "host": "localhost",
+    "port": 8080,
+    "enabled": false,
+    "api_token": ""
+  }
+}
