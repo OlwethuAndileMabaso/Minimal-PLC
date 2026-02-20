@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Minimal-PLC{% endblock %}
+
+{% block content %}
+<h1 class="mb-4" style="color:var(--accent)">
+  <i class="fa fa-gauge-high me-2"></i>Dashboard
+</h1>
+
+<!-- Stat cards -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="mp-card h-100">
+      <h6><i class="fa fa-microchip me-1"></i>PLC Status</h6>
+      {% if plc_status == 'RUNNING' %}
+        <span class="badge bg-success fs-6">RUNNING</span>
+      {% else %}
+        <span class="badge bg-danger fs-6">STOPPED</span>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="mp-card h-100">
+      <h6><i class="fa fa-network-wired me-1"></i>Active BACnet Points</h6>
+      <div class="stat-value">{{ point_count }}</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="mp-card h-100">
+      <h6><i class="fa fa-bell me-1"></i>Active Alarms</h6>
+      <div class="stat-value {% if alarm_count > 0 %}text-danger{% endif %}">{{ alarm_count }}</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="mp-card h-100">
+      <h6><i class="fa fa-clock me-1"></i>System Uptime</h6>
+      <div class="stat-value" style="font-size:1.4rem">{{ uptime }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Alarms -->
+<div class="mp-card mb-4">
+  <h6 class="mb-3"><i class="fa fa-triangle-exclamation me-1"></i>Recent Alarms</h6>
+  <div class="table-responsive">
+    <table class="table table-dark table-sm table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Point Name</th>
+          <th>Message</th>
+          <th>Severity</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for alarm in alarms %}
+        <tr>
+          <td style="white-space:nowrap;font-size:.8rem">{{ alarm.triggered_at }}</td>
+          <td>{{ alarm.name or '—' }}</td>
+          <td>{{ alarm.message or '—' }}</td>
+          <td>
+            {% if alarm.severity == 'critical' %}
+              <span class="badge bg-danger">Critical</span>
+            {% elif alarm.severity == 'high' %}
+              <span class="badge bg-warning text-dark">High</span>
+            {% elif alarm.severity == 'medium' %}
+              <span class="badge bg-primary">Medium</span>
+            {% else %}
+              <span class="badge bg-secondary">Low</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="text-center text-muted">No recent alarms</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="mp-card">
+  <h6 class="mb-3"><i class="fa fa-bolt me-1"></i>Quick Actions</h6>
+  <div class="d-flex flex-wrap gap-2">
+    <button class="btn btn-success" onclick="plcAction('start')">
+      <i class="fa fa-play me-1"></i>Start PLC
+    </button>
+    <button class="btn btn-danger" onclick="plcAction('stop')">
+      <i class="fa fa-stop me-1"></i>Stop PLC
+    </button>
+    <button class="btn btn-primary" onclick="scanBACnet()">
+      <i class="fa fa-magnifying-glass me-1"></i>Scan BACnet
+    </button>
+    <a href="/hmi" class="btn btn-outline-secondary">
+      <i class="fa fa-desktop me-1"></i>Open HMI Designer
+    </a>
+  </div>
+  <div id="actionMsg" class="mt-2 small text-muted"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function plcAction(action) {
+    fetch('/api/status', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action})
+    })
+    .then(r => r.json())
+    .then(() => {
+      document.getElementById('actionMsg').textContent =
+        'Command sent: ' + action;
+    })
+    .catch(e => console.error(e));
+  }
+
+  function scanBACnet() {
+    document.getElementById('actionMsg').textContent = 'Starting BACnet scan…';
+    fetch('/api/bacnet/discover', {method: 'POST'})
+      .then(r => r.json())
+      .then(d => {
+        document.getElementById('actionMsg').textContent =
+          d.message || 'Scan started';
+      })
+      .catch(e => console.error(e));
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,108 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+.eggs/
+.Python
+venv/
+.venv/
+env/
+ENV/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# === Node.js ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+.npm
+.eslintcache
+
+# === Android ===
+*.apk
+*.ap_
+*.aab
+.gradle/
+local.properties
+android/.gradle/
+android/build/
+android/captures/
+android/app/build/
+.idea/
+*.iml
+*.jks
+*.keystore
+
+# === iOS ===
+*.xcworkspace/
+xcuserdata/
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+Pods/
+Podfile.lock
+.build/
+
+# === SQLite ===
+*.db
+*.sqlite
+*.sqlite3
+database/minimal_plc.db
+
+# === OS files ===
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# === IDE / Editors ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# === Logs ===
+*.log
+logs/
+*.out
+
+# === Env / Secrets ===
+.env
+.env.local
+.env.*.local
+secrets.json
+*.pem
+*.key
+*.crt
+
+# === Temporary files ===
+tmp/
+temp/
+*.tmp
+*.bak
+*.orig

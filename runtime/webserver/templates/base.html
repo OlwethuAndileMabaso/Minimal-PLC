@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Minimal-PLC{% endblock %}</title>
+
+  <!-- Bootstrap 5 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-primary:   #0d1117;
+      --bg-secondary: #161b22;
+      --bg-card:      #1c2128;
+      --accent:       #00d4ff;
+      --text:         #e6edf3;
+      --border:       #30363d;
+      --sidebar-w:    260px;
+      --navbar-h:     56px;
+      --statusbar-h:  24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      margin: 0;
+    }
+
+    /* ── Navbar ── */
+    .mp-navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--navbar-h);
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      z-index: 1040;
+      gap: .75rem;
+    }
+    .mp-brand {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .mp-brand:hover { color: var(--accent); }
+    .mp-clock {
+      margin-left: auto;
+      font-size: .85rem;
+      color: #8b949e;
+      font-variant-numeric: tabular-nums;
+    }
+    .mp-notification { position: relative; cursor: pointer; }
+    .mp-notification .badge {
+      position: absolute; top: -4px; right: -6px;
+      font-size: .6rem;
+    }
+    .mp-theme-toggle { cursor: pointer; color: #8b949e; }
+    .mp-theme-toggle:hover { color: var(--accent); }
+
+    /* ── Sidebar ── */
+    .mp-sidebar {
+      position: fixed;
+      top: var(--navbar-h);
+      left: 0;
+      width: var(--sidebar-w);
+      bottom: var(--statusbar-h);
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      transition: width .2s ease;
+      z-index: 1030;
+    }
+    .mp-sidebar.collapsed { width: 56px; }
+    .mp-sidebar.collapsed .nav-label,
+    .mp-sidebar.collapsed .sidebar-section { display: none; }
+
+    .sidebar-section {
+      padding: .5rem 1rem .25rem;
+      font-size: .65rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #8b949e;
+    }
+    .mp-nav-link {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .6rem 1rem;
+      color: #8b949e;
+      text-decoration: none;
+      font-size: .9rem;
+      border-left: 3px solid transparent;
+      transition: color .15s, background .15s, border-color .15s;
+    }
+    .mp-nav-link i { width: 16px; text-align: center; flex-shrink: 0; }
+    .mp-nav-link:hover {
+      color: var(--text);
+      background: rgba(0,212,255,.07);
+    }
+    .mp-nav-link.active {
+      color: var(--accent);
+      border-left-color: var(--accent);
+      background: rgba(0,212,255,.1);
+    }
+
+    /* ── Main content ── */
+    .mp-main {
+      margin-left: var(--sidebar-w);
+      margin-top: var(--navbar-h);
+      margin-bottom: var(--statusbar-h);
+      padding: 1.5rem;
+      transition: margin-left .2s ease;
+    }
+    .mp-sidebar.collapsed ~ .mp-main { margin-left: 56px; }
+
+    /* ── Status bar ── */
+    .mp-statusbar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: var(--statusbar-h);
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      gap: 1rem;
+      font-size: .72rem;
+      color: #8b949e;
+      z-index: 1040;
+    }
+    .conn-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #3fb950;
+      display: inline-block;
+    }
+
+    /* ── Cards ── */
+    .mp-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .mp-card h6 {
+      color: #8b949e;
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: .5rem;
+    }
+    .mp-card .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* ── Tables ── */
+    .table-dark { --bs-table-bg: var(--bg-card); --bs-table-border-color: var(--border); }
+
+    /* ── Inputs ── */
+    .form-control, .form-select {
+      background: var(--bg-secondary) !important;
+      border-color: var(--border) !important;
+      color: var(--text) !important;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 .2rem rgba(0,212,255,.15) !important;
+    }
+
+    /* ── Buttons ── */
+    .btn-accent {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      font-weight: 600;
+    }
+    .btn-accent:hover { background: #00b8d9; color: #000; }
+
+    /* ── Sidebar toggle button ── */
+    #sidebarToggle { cursor: pointer; color: #8b949e; }
+    #sidebarToggle:hover { color: var(--text); }
+
+    /* Light theme overrides */
+    body.light {
+      --bg-primary:   #f6f8fa;
+      --bg-secondary: #ffffff;
+      --bg-card:      #f0f2f5;
+      --text:         #24292f;
+      --border:       #d0d7de;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navbar ── -->
+<nav class="mp-navbar">
+  <button id="sidebarToggle" class="btn btn-link p-0 border-0">
+    <i class="fa fa-bars"></i>
+  </button>
+  <a href="/dashboard" class="mp-brand">⚡ Minimal-PLC</a>
+  <span class="mp-clock" id="liveClock"></span>
+  <span class="mp-notification ms-2">
+    <i class="fa fa-bell fa-lg" style="color:#8b949e;"></i>
+    <span class="badge bg-danger" id="alarmBadge">0</span>
+  </span>
+  <span class="mp-theme-toggle ms-2" id="themeToggle" title="Toggle theme">🌙</span>
+</nav>
+
+<!-- ── Sidebar ── -->
+<aside class="mp-sidebar" id="sidebar">
+  <div class="sidebar-section">Navigation</div>
+
+  <a href="/dashboard"  class="mp-nav-link {% if request.path == '/dashboard'  %}active{% endif %}">
+    <i class="fa fa-gauge-high"></i><span class="nav-label">Dashboard</span>
+  </a>
+  <a href="/programs"   class="mp-nav-link {% if request.path == '/programs'   %}active{% endif %}">
+    <i class="fa fa-code"></i><span class="nav-label">Programs</span>
+  </a>
+  <a href="/bacnet"     class="mp-nav-link {% if request.path == '/bacnet'     %}active{% endif %}">
+    <i class="fa fa-network-wired"></i><span class="nav-label">BACnet Points</span>
+  </a>
+  <a href="/hmi"        class="mp-nav-link {% if request.path == '/hmi'        %}active{% endif %}">
+    <i class="fa fa-desktop"></i><span class="nav-label">HMI Designer</span>
+  </a>
+
+  <div class="sidebar-section">System</div>
+
+  <a href="/network"    class="mp-nav-link {% if request.path == '/network'    %}active{% endif %}">
+    <i class="fa fa-sliders"></i><span class="nav-label">Network</span>
+  </a>
+  <a href="/database"   class="mp-nav-link {% if request.path == '/database'   %}active{% endif %}">
+    <i class="fa fa-database"></i><span class="nav-label">Database</span>
+  </a>
+  <a href="/users"      class="mp-nav-link {% if request.path == '/users'      %}active{% endif %}">
+    <i class="fa fa-users"></i><span class="nav-label">Users</span>
+  </a>
+</aside>
+
+<!-- ── Main content ── -->
+<main class="mp-main" id="mainContent">
+  {% block content %}{% endblock %}
+</main>
+
+<!-- ── Status bar ── -->
+<footer class="mp-statusbar">
+  <span><span class="conn-dot" id="connDot"></span> Connected</span>
+  <span>v1.0.0</span>
+  <span id="dsCount">0 points</span>
+</footer>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // ── Live clock ──
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('liveClock').textContent =
+      now.toLocaleDateString() + '  ' + now.toLocaleTimeString();
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // ── Sidebar toggle ──
+  const sidebar     = document.getElementById('sidebar');
+  const mainContent = document.getElementById('mainContent');
+  const SIDEBAR_KEY = 'mp_sidebar_collapsed';
+
+  function applySidebarState(collapsed) {
+    if (collapsed) {
+      sidebar.classList.add('collapsed');
+    } else {
+      sidebar.classList.remove('collapsed');
+    }
+  }
+
+  applySidebarState(localStorage.getItem(SIDEBAR_KEY) === '1');
+
+  document.getElementById('sidebarToggle').addEventListener('click', () => {
+    const isCollapsed = sidebar.classList.contains('collapsed');
+    applySidebarState(!isCollapsed);
+    localStorage.setItem(SIDEBAR_KEY, isCollapsed ? '0' : '1');
+  });
+
+  // ── Theme toggle ──
+  const THEME_KEY = 'mp_theme';
+  const themeBtn = document.getElementById('themeToggle');
+
+  function applyTheme(theme) {
+    if (theme === 'light') {
+      document.body.classList.add('light');
+      themeBtn.textContent = '☀️';
+    } else {
+      document.body.classList.remove('light');
+      themeBtn.textContent = '🌙';
+    }
+  }
+
+  applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
+
+  themeBtn.addEventListener('click', () => {
+    const current = localStorage.getItem(THEME_KEY) || 'dark';
+    const next = current === 'dark' ? 'light' : 'dark';
+    localStorage.setItem(THEME_KEY, next);
+    applyTheme(next);
+  });
+</script>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

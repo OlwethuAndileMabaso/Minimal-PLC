@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}PLC Programs — Minimal-PLC{% endblock %}
+
+{% block content %}
+<h1 class="mb-4" style="color:var(--accent)">
+  <i class="fa fa-code me-2"></i>PLC Programs
+</h1>
+
+<!-- Upload card -->
+<div class="mp-card mb-4">
+  <h6 class="mb-3"><i class="fa fa-upload me-1"></i>Upload Program</h6>
+  <div class="d-flex gap-3 flex-wrap align-items-end">
+    <div>
+      <label class="form-label small">Select File (.st .il .fbd .ld)</label>
+      <input type="file" class="form-control" id="programFile"
+             accept=".st,.il,.fbd,.ld">
+    </div>
+    <button class="btn btn-accent" onclick="uploadProgram()">
+      <i class="fa fa-upload me-1"></i>Upload Program
+    </button>
+  </div>
+  <div id="uploadMsg" class="mt-2 small text-muted"></div>
+</div>
+
+<!-- Programs table -->
+<div class="mp-card mb-4">
+  <h6 class="mb-3"><i class="fa fa-list me-1"></i>Loaded Programs</h6>
+  <div class="table-responsive">
+    <table class="table table-dark table-sm table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Size</th>
+          <th>Uploaded</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="programsBody">
+        <tr><td colspan="5" class="text-center text-muted">No programs loaded</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PLC Runtime Status -->
+<div class="mp-card">
+  <h6 class="mb-3"><i class="fa fa-circle-check me-1"></i>PLC Runtime Status</h6>
+  <div class="d-flex align-items-center gap-3">
+    <span class="conn-dot" id="plcStatusDot" style="background:#ef4444"></span>
+    <span id="plcStatusText">Disconnected from OpenPLC</span>
+    <button class="btn btn-sm btn-outline-secondary ms-auto" onclick="checkPlcStatus()">
+      <i class="fa fa-rotate me-1"></i>Refresh
+    </button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function uploadProgram() {
+    const file = document.getElementById('programFile').files[0];
+    if (!file) {
+      document.getElementById('uploadMsg').textContent = 'Please select a file.';
+      return;
+    }
+    document.getElementById('uploadMsg').textContent = 'Uploading…';
+    // In a real implementation this would POST to /api/programs/upload
+    setTimeout(() => {
+      document.getElementById('uploadMsg').textContent =
+        '✅ ' + file.name + ' uploaded (demo)';
+    }, 800);
+  }
+
+  function checkPlcStatus() {
+    fetch('/api/status')
+      .then(r => r.json())
+      .then(d => {
+        const running = d.plc_status === 'RUNNING';
+        document.getElementById('plcStatusDot').style.background =
+          running ? '#3fb950' : '#ef4444';
+        document.getElementById('plcStatusText').textContent =
+          running ? 'Connected — OpenPLC RUNNING' : 'Disconnected from OpenPLC';
+      })
+      .catch(e => console.error(e));
+  }
+
+  checkPlcStatus();
+</script>
+{% endblock %}
