@@ -1,86 +1,67 @@
-# Getting Started
+# Getting Started with Minimal-PLC
 
-This guide walks you through setting up Minimal-PLC from scratch.
+## Prerequisites
 
-## What You Need
-
-| Item | Details |
-|------|---------|
-| Engineering PC | Any OS — Windows, macOS, or Linux |
-| Target machine | Linux (Raspberry Pi, Ubuntu PC) or Windows machine |
-| Network | Both machines on the same LAN |
+- **Node.js 20+** — [Download from nodejs.org](https://nodejs.org)
+- **Git** — [Download from git-scm.com](https://git-scm.com)
+- A modern browser (Chrome, Edge, Firefox)
 
 ---
 
-## Step 1 — Install the Runtime on the Target Machine
-
-Clone the repository on the **target machine**:
+## 1. Clone and Install
 
 ```bash
 git clone https://github.com/OlwethuAndileMabaso/Minimal-PLC.git
 cd Minimal-PLC
+npm run install:all
 ```
 
-### Linux
-```bash
-bash scripts/install-linux.sh
-```
-
-### Windows
-```bat
-scripts\install-windows.bat
-```
-
-### macOS
-```bash
-bash scripts/install-mac.sh
-```
+This installs all dependencies for the root, client (Angular), and server (Node.js).
 
 ---
 
-## Step 2 — Configure
-
-Edit the JSON files in `config/` before starting:
-
-- **`config/platform.json`** — Change the port if needed (default: 8080)
-- **`config/bacnet.json`** — Add your BACnet device points
-- **`config/network.json`** — Network interface settings
-
----
-
-## Step 3 — Start the Runtime
+## 2. Running in Development
 
 ```bash
-cd runtime
-bash start.sh       # Linux/macOS
-start.bat           # Windows
+npm run dev
 ```
 
-Open **http://\<target-ip\>:8080** in any browser on your LAN.
+This starts both the Angular dev server and the Node.js API server concurrently:
+
+| Service | URL |
+|---|---|
+| Angular Frontend | http://localhost:4200 |
+| Node.js API | http://localhost:3000 |
+| API Health Check | http://localhost:3000/api/health |
 
 ---
 
-## Step 4 — Design the HMI
+## 3. Opening the App
 
-On your **engineering PC**, open `editor/hmi/designer/index.html` in a browser.
-
-Drag and drop widgets to build your dashboard. Connect data sources to the runtime WebSocket endpoint (`ws://<target>:8080`). Save the board as JSON.
+1. Open your browser at **http://localhost:4200**
+2. You will see the **Minimal-PLC Welcome Screen**
+3. Click **+ New Project** or navigate using the sidebar
 
 ---
 
-## Step 5 — Write PLC Logic
+## 4. Creating Your First Project
+
+1. From the Welcome screen, click **+ New Project**
+2. You will be taken to the Dashboard
+3. Navigate to **Devices** and click **+ Add Device**
+4. Enter your device details (IP address, protocol)
+5. Once connected, go to **HMI Designer** and start building your screen
+
+---
+
+## 5. Building for Production
 
 ```bash
-cd editor/plc/openplc-editor
-bash install.sh
+npm run build
 ```
 
-Launch the OpenPLC Editor, write your IEC 61131-3 program, and deploy it to the runtime.
+The Angular app will be built into `client/dist/`. Set `NODE_ENV=production` and run the server to serve the built app.
 
----
-
-## Next Steps
-
-- [Architecture Overview](architecture.md)
-- [BACnet Integration Guide](bacnet-guide.md)
-- [HMI Design Guide](hmi-design-guide.md)
+```bash
+NODE_ENV=production npm run server
+```

@@ -1,0 +1,93 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>Settings</h1>
+  </div>
+
+  <div class="settings-content">
+    <!-- General -->
+    <div class="settings-section card">
+      <div class="section-divider">General</div>
+      <div class="form-group">
+        <label class="form-label">Application Name</label>
+        <input type="text" class="form-input" [(ngModel)]="settings.appName" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Timezone</label>
+        <select class="form-select" [(ngModel)]="settings.timezone">
+          <option *ngFor="let tz of timezones" [value]="tz">{{ tz }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Language</label>
+        <select class="form-select" [(ngModel)]="settings.language">
+          <option *ngFor="let lang of languages" [value]="lang.value">{{ lang.label }}</option>
+        </select>
+      </div>
+      <button class="btn-primary save-btn" (click)="saveGeneral()">Save General</button>
+    </div>
+
+    <!-- Network -->
+    <div class="settings-section card">
+      <div class="section-divider">Network</div>
+      <div class="form-group">
+        <label class="form-label">Server IP</label>
+        <input type="text" class="form-input" [(ngModel)]="settings.serverIP" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Server Port</label>
+        <input type="number" class="form-input" [(ngModel)]="settings.serverPort" />
+      </div>
+      <button class="btn-primary save-btn" (click)="saveNetwork()">Save Network</button>
+    </div>
+
+    <!-- Notifications -->
+    <div class="settings-section card">
+      <div class="section-divider">Notifications</div>
+      <div class="form-group">
+        <label class="form-label">SMTP Host</label>
+        <input type="text" class="form-input" [(ngModel)]="settings.smtpHost" placeholder="smtp.example.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">SMTP Port</label>
+        <input type="number" class="form-input" [(ngModel)]="settings.smtpPort" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">From Email</label>
+        <input type="email" class="form-input" [(ngModel)]="settings.smtpFrom" placeholder="alerts@example.com" />
+      </div>
+      <button class="btn-primary save-btn" (click)="saveNotifications()">Save Notifications</button>
+    </div>
+
+    <!-- Backup & Restore -->
+    <div class="settings-section card">
+      <div class="section-divider">Backup &amp; Restore</div>
+      <div class="backup-actions">
+        <button class="btn-primary" (click)="exportBackup()">📤 Export Backup</button>
+        <button class="btn-secondary" (click)="importBackup()">📥 Import Backup</button>
+      </div>
+    </div>
+
+    <!-- About -->
+    <div class="settings-section card">
+      <div class="section-divider">About</div>
+      <div class="about-info">
+        <div class="about-row">
+          <span class="about-label">Platform</span>
+          <span class="about-value">Minimal-PLC</span>
+        </div>
+        <div class="about-row">
+          <span class="about-label">Version</span>
+          <span class="badge-pill badge-primary">v1.0.0</span>
+        </div>
+        <div class="about-row">
+          <span class="about-label">License</span>
+          <span class="about-value">MIT</span>
+        </div>
+        <div class="about-row">
+          <span class="about-label">Built with</span>
+          <span class="about-value">Angular 19 + Node.js + Socket.io + SQLite</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

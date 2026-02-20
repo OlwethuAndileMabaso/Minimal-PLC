@@ -1,0 +1,42 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1>Devices</h1>
+    <div class="page-actions">
+      <button class="btn-primary" (click)="addDevice()">
+        + Add Device
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter Chips -->
+  <div class="filter-bar">
+    <button
+      class="chip-pill"
+      *ngFor="let filter of filters"
+      [class.active]="activeFilter === filter"
+      (click)="setFilter(filter)">
+      <span class="status-dot online" *ngIf="filter !== 'All'"></span>
+      {{ filter }}
+    </button>
+  </div>
+
+  <!-- Device List -->
+  <div class="card device-list-card">
+    <div class="list-row" *ngFor="let device of filteredDevices">
+      <span class="status-dot" [class.online]="device.online" [class.offline]="!device.online"></span>
+      <div class="device-info">
+        <span class="device-name">{{ device.name }}</span>
+        <span class="device-details text-sm text-muted-color">
+          {{ device.tags }} tags · Last poll: {{ device.lastPoll }}
+        </span>
+      </div>
+      <span class="protocol-badge badge-pill badge-primary">{{ device.protocol }}</span>
+      <span class="device-ip text-sm text-secondary-color">{{ device.ip }}</span>
+      <div class="device-actions">
+        <button class="btn-outline action-btn" (click)="editDevice(device)">Edit</button>
+        <button class="icon-action-btn" aria-label="More options">···</button>
+      </div>
+    </div>
+  </div>
+</div>

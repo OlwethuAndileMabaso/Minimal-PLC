@@ -1,90 +1,112 @@
-# Minimal-PLC
+# ⚡ Minimal-PLC
 
-> Open-source Industrial HMI + PLC Platform
+> Industrial SCADA/HMI Platform — Modern, open-source, and built for real-world industrial automation.
 
-**Platform Support:** Linux ✅ Windows ✅ macOS ✅ Android ✅ iOS ✅ Any Browser ✅
-
-Minimal-PLC is a complete open-source platform for building industrial control systems. It consists of two clear parts: an **Editor** you use on your engineering PC to design screens and write PLC logic, and a **Runtime** that runs 24/7 on the target machine.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Angular](https://img.shields.io/badge/Angular-19-red.svg)](https://angular.io)
+[![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org)
 
 ---
 
-## Architecture
+## Features
 
-```
-EDITOR (engineer uses this on their PC)
-├── hmi/designer/     ← Freeboard — drag & drop HMI screen designer
-└── plc/              ← OpenPLC Editor — write ladder logic
+| Feature | Description |
+|---|---|
+| 🎨 **HMI Designer** | Drag-and-drop canvas for building industrial screens |
+| 📡 **BACnet/IP** | Native BACnet/IP device support (EasyIO, etc.) |
+| 🔧 **Modbus TCP** | Modbus TCP for OpenPLC and industrial PLCs |
+| 🔌 **OPC-UA** | OPC-UA device connectivity |
+| 🚨 **Alarms** | Real-time alarm management with acknowledgment |
+| 📈 **Trends** | Live and historical trend charts |
+| 👥 **Users** | Role-based access (Admin, Operator, Viewer) |
+| ⚙️ **Settings** | Full system configuration |
+| 🔄 **Real-time** | Socket.io live data push |
 
-        ↓ Deploy
+---
 
-RUNTIME (runs 24/7 on target machine - Linux or Windows)
-├── webserver/        ← Flask server at :8080, serves Freeboard HMI to any browser
-├── plc/              ← OpenPLC Runtime — executes PLC logic
-├── bacnet/           ← Reads live values from BACnet devices on network
-└── database/         ← SQLite — stores history, alarms, config
-```
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | Angular 19, Angular Material, TypeScript |
+| Backend | Node.js, Express 4, Socket.io 4 |
+| Database | SQLite 3 |
+| Protocols | BACnet/IP, Modbus TCP, OPC-UA, MQTT |
+| Charts | Chart.js 4 |
+| Styling | SCSS, Inter font, CSS custom properties |
 
 ---
 
 ## Quick Start
 
-### Step 1 — Install the Runtime (on your target machine)
-
-**Linux:**
 ```bash
+# 1. Clone the repository
 git clone https://github.com/OlwethuAndileMabaso/Minimal-PLC.git
 cd Minimal-PLC
-bash scripts/install-linux.sh
+
+# 2. Install all dependencies
+npm run install:all
+
+# 3. Start in development mode
+npm run dev
 ```
 
-**Windows:**
-```bat
-git clone https://github.com/OlwethuAndileMabaso/Minimal-PLC.git
-cd Minimal-PLC
-scripts\install-windows.bat
-```
+Open your browser at **http://localhost:4200**
 
-**macOS:**
-```bash
-git clone https://github.com/OlwethuAndileMabaso/Minimal-PLC.git
-cd Minimal-PLC
-bash scripts/install-mac.sh
-```
-
-### Step 2 — Start the Runtime
-
-**Linux/macOS:**
-```bash
-cd runtime
-bash start.sh
-```
-
-**Windows:**
-```bat
-cd runtime
-start.bat
-```
-
-Open your browser at **http://localhost:8080**
-
-### Step 3 — Design your HMI (on your engineering PC)
-
-Open `editor/hmi/designer/index.html` in your browser to use the Freeboard drag-and-drop designer.
-
-### Step 4 — Write PLC Logic
-
-Use the OpenPLC Editor in `editor/plc/openplc-editor/` — run `install.sh` to set it up, then write ladder logic and deploy to the runtime.
+The API server runs at **http://localhost:3000**
 
 ---
 
-## Credits
+## Project Structure
 
-- **OpenPLC Runtime** — [thiagoralves/OpenPLC_v3](https://github.com/thiagoralves/OpenPLC_v3) (GPL-3.0)
-- **OpenPLC Editor** — [thiagoralves/OpenPLC_Editor](https://github.com/thiagoralves/OpenPLC_Editor) (GPL-2.0)
-- **Freeboard HMI** — [Freeboard/freeboard](https://github.com/Freeboard/freeboard) (MIT)
+```
+Minimal-PLC/
+├── client/          ← Angular 19 frontend
+│   └── src/app/
+│       ├── welcome/        ← Startup/welcome screen
+│       ├── layout/         ← Sidebar navigation shell
+│       ├── dashboard/      ← Live dashboard
+│       ├── hmi-designer/   ← Drag-and-drop HMI canvas
+│       ├── devices/        ← Device management
+│       ├── alarms/         ← Alarm management
+│       ├── trends/         ← Trend charts
+│       ├── users/          ← User management
+│       └── settings/       ← System settings
+├── server/          ← Node.js API + Socket.io server
+├── docs/            ← Guides and documentation
+└── scripts/         ← Install scripts for all platforms
+```
+
+---
+
+## Screenshots
+
+> _Screenshots coming soon — run the app and see for yourself!_
+
+---
+
+## Documentation
+
+- [Getting Started](docs/getting-started.md)
+- [Connecting EasyIO via BACnet](docs/connecting-easyio-bacnet.md)
+- [Connecting OpenPLC via Modbus](docs/connecting-openplc.md)
+
+---
+
+## Install Scripts
+
+| Platform | Command |
+|---|---|
+| Linux | `bash scripts/install-linux.sh` |
+| Windows | `scripts\install-windows.bat` |
+| macOS | `bash scripts/install-mac.sh` |
 
 ---
 
 ## License
 
 MIT — see [LICENSE](LICENSE)
+
+---
+
+<p align="center">Built with ❤️ for industrial automation engineers</p>

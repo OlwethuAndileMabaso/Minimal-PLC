@@ -1,0 +1,62 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1>Dashboard</h1>
+    <div class="page-actions">
+      <button class="btn-secondary" (click)="refresh()">
+        🔄 Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="stats-grid">
+    <div class="stat-card" *ngFor="let stat of stats">
+      <span class="stat-label">{{ stat.label }}</span>
+      <span class="stat-value">{{ stat.value }}</span>
+      <span class="stat-sub" [ngClass]="stat.subClass">{{ stat.sub }}</span>
+    </div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="content-grid">
+    <!-- Recent Alarms -->
+    <div class="card">
+      <div class="section-header">
+        <h3>Recent Alarms</h3>
+      </div>
+      <div class="alarm-list">
+        <div class="alarm-row" *ngFor="let alarm of recentAlarms">
+          <span class="badge-pill"
+            [class.badge-danger]="alarm.severity === 'critical'"
+            [class.badge-warning]="alarm.severity === 'warning'">
+            {{ alarm.severity === 'critical' ? '🔴 CRITICAL' : '🟡 WARNING' }}
+          </span>
+          <span class="alarm-message">{{ alarm.message }}</span>
+          <span class="alarm-time text-muted-color text-sm">{{ alarm.time }}</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <a routerLink="/app/alarms" class="btn-primary footer-btn">View all →</a>
+      </div>
+    </div>
+
+    <!-- Connected Devices -->
+    <div class="card">
+      <div class="section-header">
+        <h3>Connected Devices</h3>
+      </div>
+      <div class="device-list">
+        <div class="device-row" *ngFor="let device of connectedDevices">
+          <span class="status-dot" [class.online]="device.online" [class.offline]="!device.online"></span>
+          <span class="device-name">{{ device.name }}</span>
+          <span class="device-protocol badge-pill badge-neutral">{{ device.protocol }}</span>
+          <span class="device-ip text-muted-color text-sm">{{ device.ip }}</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <a routerLink="/app/devices" class="btn-primary footer-btn">Manage →</a>
+      </div>
+    </div>
+  </div>
+</div>

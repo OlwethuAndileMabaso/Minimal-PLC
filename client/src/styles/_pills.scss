@@ -1,0 +1,153 @@
+// Pill-shaped button and badge utilities
+.btn-pill {
+  border-radius: var(--radius-pill) !important;
+  padding: 8px 20px;
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  border: none;
+  outline: none;
+  white-space: nowrap;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+.btn-primary {
+  @extend .btn-pill;
+  background: var(--color-primary);
+  color: var(--text-inverse);
+
+  &:hover {
+    background: var(--color-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.btn-secondary {
+  @extend .btn-pill;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--bg-border);
+
+  &:hover {
+    background: var(--bg-surface-2);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+.btn-outline {
+  @extend .btn-pill;
+  background: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+
+  &:hover {
+    background: var(--color-primary-light);
+  }
+}
+
+.btn-danger {
+  @extend .btn-pill;
+  background: var(--color-danger);
+  color: var(--text-inverse);
+
+  &:hover {
+    background: #DC2626;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+// Filter chip pills
+.chip-pill {
+  border-radius: var(--radius-pill);
+  padding: 6px 16px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid var(--bg-border);
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+
+  &.active {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+    border-color: var(--color-primary-muted);
+  }
+
+  &:hover:not(.active) {
+    background: var(--bg-surface);
+  }
+}
+
+// Badge pills
+.badge-pill {
+  border-radius: var(--radius-badge);
+  padding: 2px 10px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+
+  &.badge-success {
+    background: var(--color-success-light);
+    color: var(--color-success);
+  }
+
+  &.badge-warning {
+    background: var(--color-warning-light);
+    color: var(--color-warning);
+  }
+
+  &.badge-danger {
+    background: var(--color-danger-light);
+    color: var(--color-danger);
+  }
+
+  &.badge-info {
+    background: var(--color-info-light);
+    color: var(--color-info);
+  }
+
+  &.badge-primary {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+  }
+
+  &.badge-neutral {
+    background: var(--bg-surface-2);
+    color: var(--text-secondary);
+  }
+}
+
+// Notification count badge
+.count-badge {
+  border-radius: 999px;
+  background: var(--color-danger);
+  color: var(--text-inverse);
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}

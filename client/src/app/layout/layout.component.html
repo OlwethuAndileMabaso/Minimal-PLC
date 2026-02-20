@@ -1,0 +1,75 @@
+<div class="layout-shell" [class.sidebar-collapsed]="sidebarCollapsed">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <!-- Brand -->
+    <div class="sidebar-brand" (click)="goHome()">
+      <span class="brand-icon">⚡</span>
+      <span class="brand-name" *ngIf="!sidebarCollapsed">Minimal-PLC</span>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Navigation Items -->
+    <nav class="sidebar-nav">
+      <button
+        class="nav-item"
+        *ngFor="let item of navItems"
+        [class.active]="isActive(item.route)"
+        (click)="navigate(item.route)"
+        [matTooltip]="sidebarCollapsed ? item.label : ''"
+        matTooltipPosition="right">
+        <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+        <span class="nav-label" *ngIf="!sidebarCollapsed">{{ item.label }}</span>
+        <span class="count-badge" *ngIf="item.badge && item.badge > 0 && !sidebarCollapsed">
+          {{ item.badge }}
+        </span>
+        <span class="count-badge small" *ngIf="item.badge && item.badge > 0 && sidebarCollapsed">
+          {{ item.badge }}
+        </span>
+      </button>
+    </nav>
+
+    <!-- Bottom Section -->
+    <div class="sidebar-bottom">
+      <mat-divider></mat-divider>
+      <div class="user-info" *ngIf="!sidebarCollapsed">
+        <div class="user-avatar-sm">A</div>
+        <div class="user-details">
+          <span class="user-name">Admin</span>
+          <span class="user-role">Administrator</span>
+        </div>
+      </div>
+      <div class="version-info" *ngIf="!sidebarCollapsed">
+        <span class="status-dot online"></span>
+        <span class="text-xs text-muted-color">v1.0.0</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Area -->
+  <div class="main-area">
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="toggle-btn" (click)="toggleSidebar()" aria-label="Toggle sidebar">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <h1 class="page-title">{{ currentPageTitle }}</h1>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" [matBadge]="activeAlarms" matBadgeColor="warn" matBadgeSize="small" aria-label="Notifications">
+          <mat-icon>notifications</mat-icon>
+        </button>
+        <div class="user-avatar-pill">
+          <div class="user-avatar-sm">A</div>
+          <span>Admin</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

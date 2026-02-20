@@ -1,0 +1,83 @@
+<div class="designer-shell">
+  <!-- Designer Toolbar -->
+  <div class="designer-toolbar">
+    <h2 class="designer-title">HMI Designer</h2>
+    <div class="toolbar-actions">
+      <button class="btn-primary" (click)="save()">💾 Save</button>
+      <button class="btn-secondary" (click)="preview()">▶ Preview</button>
+      <button class="btn-secondary" (click)="goBack()">← Back</button>
+    </div>
+  </div>
+
+  <!-- Three-Panel Layout -->
+  <div class="designer-panels">
+    <!-- Left Panel: Widgets -->
+    <aside class="panel panel-left">
+      <div class="panel-header">
+        <span>WIDGETS</span>
+      </div>
+      <div class="widget-search">
+        <input type="text" placeholder="Search 🔍" [(ngModel)]="searchQuery" class="search-input-sm" />
+      </div>
+      <div class="widget-groups">
+        <div class="widget-group" *ngFor="let group of widgetGroups">
+          <div class="group-label">{{ group.name }}</div>
+          <div class="widgets-row">
+            <div class="widget-item" *ngFor="let widget of group.widgets">
+              <span class="widget-icon">{{ widget.icon }}</span>
+              <span class="widget-label">{{ widget.label }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="import-svg">
+        <button class="btn-outline" (click)="importSVG()">↑ SVG Import</button>
+      </div>
+    </aside>
+
+    <!-- Center: Canvas -->
+    <div class="canvas-area">
+      <div class="canvas">
+        <div class="canvas-grid-overlay"></div>
+        <div class="canvas-drop-hint">
+          <mat-icon>add_circle_outline</mat-icon>
+          <span>Drag widgets here to design your HMI screen</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel: Properties & Layers -->
+    <aside class="panel panel-right">
+      <div class="panel-tabs">
+        <button
+          class="tab-btn"
+          [class.active]="selectedPanel === 'properties'"
+          (click)="selectedPanel = 'properties'">Properties</button>
+        <button
+          class="tab-btn"
+          [class.active]="selectedPanel === 'layers'"
+          (click)="selectedPanel = 'layers'">Layers</button>
+      </div>
+
+      <!-- Properties Panel -->
+      <div class="panel-content" *ngIf="selectedPanel === 'properties'">
+        <div class="empty-state">
+          <mat-icon>touch_app</mat-icon>
+          <p>Select a widget to edit its properties</p>
+        </div>
+      </div>
+
+      <!-- Layers Panel -->
+      <div class="panel-content" *ngIf="selectedPanel === 'layers'">
+        <div class="layers-header">LAYERS</div>
+        <div class="layer-item" *ngFor="let layer of layers">
+          <button class="layer-toggle" (click)="toggleLayer(layer)" [attr.aria-label]="layer.visible ? 'Hide' : 'Show'">
+            {{ layer.visible ? '✅' : '⬜' }}
+          </button>
+          <span class="layer-name">{{ layer.name }}</span>
+        </div>
+        <button class="btn-outline layer-add-btn" (click)="addLayer()">+ Layer</button>
+      </div>
+    </aside>
+  </div>
+</div>

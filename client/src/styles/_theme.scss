@@ -1,0 +1,44 @@
+// Angular Material prebuilt theme override
+// Override Material component styles to match design tokens
+.mat-toolbar {
+  background: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  box-shadow: var(--shadow-sm) !important;
+  border-bottom: 1px solid var(--bg-border) !important;
+}
+
+.mat-sidenav {
+  background: var(--bg-primary) !important;
+  border-right: 1px solid var(--bg-border) !important;
+}
+
+.mat-card,
+.mat-mdc-card {
+  border-radius: var(--radius-card) !important;
+  box-shadow: var(--shadow-sm) !important;
+  border: 1px solid var(--bg-border) !important;
+}
+
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary {
+  border-radius: var(--radius-pill) !important;
+  background-color: var(--color-primary) !important;
+
+  &:hover {
+    background-color: var(--color-primary-hover) !important;
+  }
+}
+
+.mat-mdc-button {
+  border-radius: var(--radius-pill) !important;
+}
+
+.mat-mdc-outlined-button {
+  border-radius: var(--radius-pill) !important;
+}
+
+.mat-mdc-form-field {
+  .mat-mdc-text-field-wrapper {
+    border-radius: var(--radius-input) !important;
+  }
+}

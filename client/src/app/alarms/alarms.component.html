@@ -1,0 +1,60 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1>Alarms</h1>
+      <span class="badge-pill badge-danger" *ngIf="activeCount > 0">🔴 Active: {{ activeCount }}</span>
+    </div>
+    <div class="page-actions">
+      <button class="btn-secondary" (click)="acknowledgeAll()">Ack All</button>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <button
+      class="chip-pill"
+      *ngFor="let filter of filters"
+      [class.active]="activeFilter === filter"
+      (click)="setFilter(filter)">
+      <span class="status-dot online" *ngIf="filter === 'Active'"></span>
+      {{ filter }}
+    </button>
+    <div class="search-pill">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input
+        type="text"
+        placeholder="Search alarms..."
+        [(ngModel)]="searchQuery"
+        class="search-input" />
+    </div>
+  </div>
+
+  <!-- Alarms List -->
+  <div class="card alarms-card">
+    <div class="alarm-row list-row" *ngFor="let alarm of filteredAlarms">
+      <span class="severity-badge badge-pill"
+        [class.badge-danger]="alarm.severity === 'critical'"
+        [class.badge-warning]="alarm.severity === 'warning'"
+        [class.badge-success]="alarm.severity === 'normal'">
+        {{ getSeverityIcon(alarm.severity) }}
+        {{ alarm.severity.toUpperCase() }}
+      </span>
+      <span class="alarm-message">{{ alarm.message }}</span>
+      <span class="alarm-time text-sm text-muted-color">{{ alarm.time }}</span>
+      <button
+        class="btn-outline ack-btn"
+        *ngIf="!alarm.acknowledged && alarm.severity !== 'normal'"
+        (click)="acknowledge(alarm)">
+        Ack
+      </button>
+      <span class="acked-text text-muted-color text-sm" *ngIf="alarm.acknowledged">—</span>
+    </div>
+  </div>
+
+  <!-- Export Actions -->
+  <div class="export-bar">
+    <button class="btn-secondary" (click)="exportCSV()">Export CSV</button>
+    <button class="btn-secondary" (click)="exportPDF()">Export PDF</button>
+  </div>
+</div>

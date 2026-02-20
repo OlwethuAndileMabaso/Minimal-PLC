@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">Minimal-PLC</string>
-    <!-- Change this to your PLC runtime IP address or hostname -->
-    <string name="runtime_url">http://192.168.1.100:8080</string>
-</resources>
