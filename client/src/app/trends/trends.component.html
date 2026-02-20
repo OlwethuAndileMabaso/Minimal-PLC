@@ -1,0 +1,40 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1>Trends</h1>
+    <div class="page-actions">
+      <button class="btn-secondary" (click)="exportCSV()">Export CSV</button>
+      <button class="btn-secondary" (click)="exportPNG()">Export PNG</button>
+    </div>
+  </div>
+
+  <!-- Time Range Filters -->
+  <div class="time-range-bar">
+    <button
+      class="chip-pill"
+      *ngFor="let range of timeRanges"
+      [class.active]="activeRange === range"
+      (click)="setRange(range)">
+      {{ range }}
+    </button>
+  </div>
+
+  <!-- Tag Selector -->
+  <div class="tag-selector card">
+    <span class="text-sm font-medium">Tags:</span>
+    <span class="tag-chip badge-pill badge-primary" *ngFor="let tag of selectedTags">
+      {{ tag }}
+      <button class="tag-remove" (click)="removeTag(tag)" aria-label="Remove tag">×</button>
+    </span>
+    <button class="btn-primary add-tag-btn">+ Add Tag</button>
+  </div>
+
+  <!-- Chart Area -->
+  <div class="chart-card card">
+    <div class="chart-placeholder">
+      <mat-icon>show_chart</mat-icon>
+      <span>Chart.js chart will render here</span>
+      <p class="text-sm text-muted-color">Connect to live data to see trends</p>
+    </div>
+  </div>
+</div>

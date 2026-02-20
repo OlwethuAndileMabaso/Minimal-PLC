@@ -1,0 +1,98 @@
+<div class="welcome-page">
+  <!-- Top Bar -->
+  <header class="top-bar">
+    <div class="brand">
+      <span class="brand-icon">⚡</span>
+      <span class="brand-name">Minimal-PLC</span>
+    </div>
+    <div class="top-bar-right">
+      <span class="version-badge">v1.0.0</span>
+      <div class="user-avatar">A</div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="welcome-main">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-icon">⚡</div>
+      <h1 class="hero-title">Minimal-PLC</h1>
+      <p class="hero-subtitle">Industrial SCADA Platform &nbsp;·&nbsp; v1.0.0</p>
+    </section>
+
+    <!-- Greeting Banner -->
+    <div class="greeting-banner">
+      <p class="greeting-text">{{ greeting }}, Admin 👋</p>
+      <p class="greeting-sub">2 projects active · 3 active alarms</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <section class="section">
+      <div class="section-divider">Quick Actions</div>
+      <div class="actions-grid">
+        <button class="btn-primary" (click)="navigate('/app/dashboard')">
+          <span>+</span> New Project
+        </button>
+        <button class="btn-secondary" (click)="navigate('/app/dashboard')">
+          📂 Open Project
+        </button>
+        <a class="btn-secondary" href="docs/getting-started.md" target="_blank">
+          📖 Docs
+        </a>
+        <button class="btn-secondary" (click)="navigate('/app/devices')">
+          📡 Add Device
+        </button>
+        <button class="btn-secondary" (click)="navigate('/app/hmi-designer')">
+          🎨 HMI Designer
+        </button>
+        <button class="btn-secondary" (click)="navigate('/app/settings')">
+          ⚙️ Settings
+        </button>
+      </div>
+    </section>
+
+    <!-- Recent Projects -->
+    <section class="section">
+      <div class="section-divider">Recent Projects</div>
+      <div class="projects-grid">
+        <div class="project-card card-hover" *ngFor="let project of recentProjects">
+          <div class="project-header">
+            <span class="project-icon">{{ project.icon }}</span>
+            <span class="project-name">{{ project.name }}</span>
+          </div>
+          <div class="project-meta">
+            <span class="text-sm text-secondary-color">Last opened: {{ project.lastOpened }}</span>
+          </div>
+          <div class="project-stats">
+            <span class="stat-chip">
+              <span class="status-dot online"></span>
+              {{ project.devices }} devices
+            </span>
+            <span class="stat-chip" [class.alarm-chip]="project.alarms > 0">
+              <ng-container *ngIf="project.alarms > 0">🔴 {{ project.alarms }} alarms</ng-container>
+              <ng-container *ngIf="project.alarms === 0">✅ 0 alarms</ng-container>
+            </span>
+          </div>
+          <button class="btn-primary open-btn" (click)="openProject(project)">
+            Open ›
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Getting Started -->
+    <section class="section">
+      <div class="section-divider">Getting Started</div>
+      <div class="steps-grid">
+        <div class="step-card card-outlined" *ngFor="let step of gettingStarted">
+          <div class="step-number">Step {{ step.step }}</div>
+          <h3 class="step-title">{{ step.title }}</h3>
+          <p class="step-desc">{{ step.description }}</p>
+          <button class="btn-primary step-btn" (click)="navigate(step.route)">
+            Start →
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>

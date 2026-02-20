@@ -1,0 +1,28 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1>Users</h1>
+    <div class="page-actions">
+      <button class="btn-primary" (click)="addUser()">+ Add User</button>
+    </div>
+  </div>
+
+  <!-- Users List -->
+  <div class="card users-card">
+    <div class="list-row user-row" *ngFor="let user of users">
+      <div class="user-avatar-sm">{{ user.name[0] }}</div>
+      <div class="user-details">
+        <span class="user-name">{{ user.name }}</span>
+        <span class="user-email text-sm text-muted-color">{{ user.email }}</span>
+      </div>
+      <span class="badge-pill role-badge" [ngClass]="getRoleBadgeClass(user.role)">
+        {{ user.role }}
+      </span>
+      <span class="last-login text-sm text-muted-color">{{ user.lastLogin }}</span>
+      <div class="user-actions">
+        <button class="btn-outline action-btn" (click)="editUser(user)">Edit</button>
+        <button class="btn-danger action-btn" (click)="deleteUser(user)">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>

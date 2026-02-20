@@ -1,16 +1,7 @@
 @echo off
-REM Install Minimal-PLC Runtime on Windows
-echo === Minimal-PLC Windows Installer ===
-
-SET REPO_DIR=%~dp0..
-
-REM Check Python
-python --version 2>nul || (echo ERROR: Python not found. Install from https://python.org && exit /b 1)
-
-REM Install Python dependencies
-echo Installing Python packages...
-pip install -r "%REPO_DIR%\runtime\requirements.txt"
-
+echo Installing Minimal-PLC...
+where node >nul 2>&1 || (echo Node.js not found. Please install from https://nodejs.org && pause && exit)
+call npm run install:all
 echo.
-echo Installation complete!
-echo Run: cd runtime ^& start.bat
+echo Done! Run: npm run dev
+pause
