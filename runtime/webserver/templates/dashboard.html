@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Minimal-PLC{% endblock %}
+
+{% block content %}
+<h1>Dashboard</h1>
+
+<div class="card">
+    <h2>System Status</h2>
+    <table>
+        <tr><th>Component</th><th>Status</th></tr>
+        <tr><td>Web Server</td><td><span class="badge badge-green">Running</span></td></tr>
+        <tr><td>OpenPLC Runtime</td><td><span class="badge badge-grey" id="plc-status">Unknown</span></td></tr>
+        <tr><td>BACnet Client</td><td><span class="badge badge-grey" id="bacnet-status">Unknown</span></td></tr>
+        <tr><td>Database</td><td><span class="badge badge-grey" id="db-status">Unknown</span></td></tr>
+    </table>
+</div>
+
+<div class="card">
+    <h2>Platform</h2>
+    <table>
+        <tr><th>Setting</th><th>Value</th></tr>
+        <tr><td>Name</td><td>{{ platform.get('name', 'Minimal-PLC') }}</td></tr>
+        <tr><td>Version</td><td>{{ platform.get('version', '1.0.0') }}</td></tr>
+        <tr><td>Port</td><td>{{ platform.get('port', 8080) }}</td></tr>
+    </table>
+</div>
+
+<div class="card">
+    <h2>Quick Links</h2>
+    <p><a href="/hmi" style="color:#e94560">Open HMI →</a></p>
+</div>
+{% endblock %}

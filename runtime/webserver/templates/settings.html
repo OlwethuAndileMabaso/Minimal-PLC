@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Settings — Minimal-PLC{% endblock %}
+
+{% block content %}
+<h1>Settings</h1>
+
+<div class="card">
+    <h2>Platform Configuration</h2>
+    <table>
+        <tr><th>Setting</th><th>Value</th></tr>
+        <tr><td>Name</td><td>{{ platform.get('name', 'Minimal-PLC') }}</td></tr>
+        <tr><td>Version</td><td>{{ platform.get('version', '1.0.0') }}</td></tr>
+        <tr><td>Host</td><td>{{ platform.get('host', '0.0.0.0') }}</td></tr>
+        <tr><td>Port</td><td>{{ platform.get('port', 8080) }}</td></tr>
+        <tr><td>Debug</td><td>{{ platform.get('debug', false) }}</td></tr>
+    </table>
+</div>
+
+<div class="card">
+    <h2>Config Files</h2>
+    <p style="font-size:0.9rem;color:#a0a0b0">
+        Edit the JSON files in the <code>config/</code> directory to change settings,
+        then restart the runtime.
+    </p>
+    <ul style="margin-top:0.8rem;font-size:0.9rem;line-height:2">
+        <li><code>config/platform.json</code> — server host, port, name</li>
+        <li><code>config/network.json</code> — network interface settings</li>
+        <li><code>config/bacnet.json</code> — BACnet device settings</li>
+    </ul>
+</div>
+{% endblock %}

@@ -1,0 +1,7 @@
+{
+  "interface": "eth0",
+  "ip": "dhcp",
+  "subnet": "255.255.255.0",
+  "gateway": "",
+  "dns": ""
+}
