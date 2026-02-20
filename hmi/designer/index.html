@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HMI Designer — Minimal-PLC</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+  <style>
+    :root {
+      --bg-primary:   #0d1117;
+      --bg-secondary: #161b22;
+      --bg-card:      #1c2128;
+      --accent:       #00d4ff;
+      --text:         #e6edf3;
+      --border:       #30363d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Toolbar ── */
+    #toolbar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: .4rem .75rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      flex-shrink: 0;
+    }
+    #toolbar .brand { font-weight: 700; color: var(--accent); margin-right: .5rem; }
+    .tb-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: .25rem .6rem;
+      border-radius: 4px;
+      font-size: .82rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .tb-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .tb-btn.deploy { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+    .tb-btn.deploy:hover { background: #00b8d9; }
+
+    /* ── Layout ── */
+    #workspace {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Left panel — Widgets ── */
+    #widgetPanel {
+      width: 180px;
+      flex-shrink: 0;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .panel-header {
+      padding: .5rem .75rem;
+      font-size: .65rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #8b949e;
+      border-bottom: 1px solid var(--border);
+    }
+    .widget-item {
+      padding: .55rem .75rem;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .85rem;
+      border-left: 3px solid transparent;
+      user-select: none;
+    }
+    .widget-item:hover {
+      background: rgba(0,212,255,.08);
+      border-left-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── Canvas ── */
+    #canvas {
+      flex: 1;
+      position: relative;
+      background-color: var(--bg-primary);
+      background-image:
+        radial-gradient(circle, #30363d 1px, transparent 1px);
+      background-size: 24px 24px;
+      overflow: hidden;
+    }
+
+    /* ── Right panel — Properties ── */
+    #propPanel {
+      width: 200px;
+      flex-shrink: 0;
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .prop-row { padding: .35rem .75rem; }
+    .prop-row label { font-size: .72rem; color: #8b949e; display: block; margin-bottom: .15rem; }
+    .prop-row input, .prop-row select {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 4px;
+      padding: .2rem .4rem;
+      font-size: .8rem;
+    }
+    .prop-row input:focus, .prop-row select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    /* ── Page tabs ── */
+    #pageTabs {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 .5rem;
+      height: 32px;
+      flex-shrink: 0;
+      gap: .25rem;
+    }
+    .page-tab {
+      padding: .2rem .6rem;
+      border-radius: 4px 4px 0 0;
+      font-size: .8rem;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+    .page-tab.active { border-color: var(--border); border-bottom-color: var(--bg-primary); background: var(--bg-primary); color: var(--accent); }
+    .page-tab:hover:not(.active) { background: rgba(0,212,255,.06); }
+    .add-page { color: #8b949e; font-size: 1rem; cursor: pointer; padding: 0 .4rem; }
+    .add-page:hover { color: var(--accent); }
+
+    /* ── Placed widgets ── */
+    .hmi-widget {
+      position: absolute;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: .5rem;
+      min-width: 80px;
+      min-height: 50px;
+      cursor: move;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: .8rem;
+      text-align: center;
+      gap: .2rem;
+    }
+    .hmi-widget.selected { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0,212,255,.3); }
+    .hmi-widget .wgt-title { font-size: .7rem; color: #8b949e; }
+    .hmi-widget .wgt-value { font-size: 1.2rem; font-weight: 700; color: var(--accent); }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 50px; right: 1rem;
+      background: #3fb950; color: #000;
+      padding: .5rem 1rem; border-radius: 6px;
+      font-size: .85rem; font-weight: 600;
+      display: none; z-index: 9999;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Toolbar -->
+<div id="toolbar">
+  <span class="brand">⚡ HMI Designer</span>
+  <button class="tb-btn" onclick="newScreen()"><i class="fa fa-file me-1"></i>New Screen</button>
+  <button class="tb-btn" onclick="saveLayout()"><i class="fa fa-floppy-disk me-1"></i>Save</button>
+  <button class="tb-btn" onclick="previewLayout()"><i class="fa fa-eye me-1"></i>Preview</button>
+  <button class="tb-btn deploy" onclick="deployLayout()"><i class="fa fa-rocket me-1"></i>Deploy</button>
+</div>
+
+<!-- Workspace -->
+<div id="workspace">
+
+  <!-- Left: Widget palette -->
+  <div id="widgetPanel">
+    <div class="panel-header">Widgets</div>
+    <div class="widget-item" draggable="true" data-type="gauge">📊 Gauge</div>
+    <div class="widget-item" draggable="true" data-type="value">🔢 Value</div>
+    <div class="widget-item" draggable="true" data-type="chart">📈 Chart</div>
+    <div class="widget-item" draggable="true" data-type="status">🔴 Status Light</div>
+    <div class="widget-item" draggable="true" data-type="button">🔘 Button</div>
+    <div class="widget-item" draggable="true" data-type="label">🏷️ Label</div>
+    <div class="widget-item" draggable="true" data-type="alarms">🚨 Alarms</div>
+  </div>
+
+  <!-- Center: Canvas -->
+  <div id="canvas" ondragover="event.preventDefault()" ondrop="onDrop(event)"></div>
+
+  <!-- Right: Properties -->
+  <div id="propPanel">
+    <div class="panel-header">Properties</div>
+    <div id="propsEmpty" style="padding:.75rem;font-size:.8rem;color:#8b949e;">
+      Select a widget to edit its properties.
+    </div>
+    <div id="propsForm" style="display:none">
+      <div class="prop-row"><label>Title</label>
+        <input id="pTitle" oninput="updateProp('title',this.value)"></div>
+      <div class="prop-row"><label>Data Source</label>
+        <input id="pSource" placeholder="point name" oninput="updateProp('data_source',this.value)"></div>
+      <div class="prop-row"><label>Min Value</label>
+        <input id="pMin" type="number" oninput="updateProp('min',this.value)"></div>
+      <div class="prop-row"><label>Max Value</label>
+        <input id="pMax" type="number" oninput="updateProp('max',this.value)"></div>
+      <div class="prop-row"><label>Color</label>
+        <input id="pColor" type="color" value="#00d4ff" oninput="updateProp('color',this.value)"></div>
+      <div class="prop-row"><label>Width (px)</label>
+        <input id="pWidth" type="number" value="120" oninput="updateProp('width',this.value)"></div>
+      <div class="prop-row"><label>Height (px)</label>
+        <input id="pHeight" type="number" value="80" oninput="updateProp('height',this.value)"></div>
+      <div class="prop-row" style="padding-top:.5rem">
+        <button class="tb-btn" style="width:100%;color:#ef4444;border-color:#ef4444"
+                onclick="deleteSelected()">🗑 Delete Widget</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Page tabs -->
+<div id="pageTabs">
+  <span class="page-tab active" data-page="0">Page 1</span>
+  <span class="add-page" onclick="addPage()" title="Add page">＋</span>
+</div>
+
+<div id="toast">✅ Deployed!</div>
+
+<script>
+  // ── State ──────────────────────────────────────────────────────────────
+  let pages = [{ name: 'Page 1', widgets: [] }];
+  let currentPage = 0;
+  let selectedId  = null;
+  let dragType    = null;
+  let widgetSeq   = 0;
+
+  // ── Socket.IO for live preview ─────────────────────────────────────────
+  let socket;
+  try {
+    socket = io({ transports: ['websocket'] });
+    socket.on('point_update', (data) => {
+      document.querySelectorAll('.hmi-widget').forEach(el => {
+        if (el.dataset.source === data.name) {
+          const valEl = el.querySelector('.wgt-value');
+          if (valEl) valEl.textContent = data.last_value ?? '—';
+        }
+      });
+    });
+  } catch (e) { /* Socket.IO not available in designer preview */ }
+
+  // ── Drag from palette ──────────────────────────────────────────────────
+  document.querySelectorAll('.widget-item').forEach(item => {
+    item.addEventListener('dragstart', e => {
+      dragType = item.dataset.type;
+      e.dataTransfer.effectAllowed = 'copy';
+    });
+  });
+
+  function onDrop(e) {
+    e.preventDefault();
+    if (!dragType) return;
+    const canvas = document.getElementById('canvas');
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    placeWidget(dragType, x, y);
+    dragType = null;
+  }
+
+  function placeWidget(type, x, y, props = {}) {
+    const id = 'w' + (++widgetSeq);
+    const w = {
+      id, type, x, y,
+      title: props.title || type,
+      data_source: props.data_source || '',
+      min: props.min || 0,
+      max: props.max || 100,
+      color: props.color || '#00d4ff',
+      width:  props.width  || 120,
+      height: props.height || 80,
+    };
+    pages[currentPage].widgets.push(w);
+    renderWidget(w);
+    return w;
+  }
+
+  function renderWidget(w) {
+    const el = document.createElement('div');
+    el.className = 'hmi-widget';
+    el.id = w.id;
+    el.dataset.source = w.data_source || '';
+    el.style.left   = w.x + 'px';
+    el.style.top    = w.y + 'px';
+    el.style.width  = (w.width  || 120) + 'px';
+    el.style.height = (w.height || 80)  + 'px';
+    el.style.borderColor = w.color || '#30363d';
+
+    const icon = {
+      gauge: '📊', value: '🔢', chart: '📈',
+      status: '🔴', button: '🔘', label: '🏷️', alarms: '🚨'
+    }[w.type] || '▪';
+
+    el.innerHTML = `
+      <div style="font-size:1.3rem">${icon}</div>
+      <div class="wgt-title">${w.title}</div>
+      <div class="wgt-value" style="color:${w.color}">—</div>`;
+
+    el.addEventListener('click', (e) => { e.stopPropagation(); selectWidget(w.id); });
+    makeDraggable(el);
+    document.getElementById('canvas').appendChild(el);
+  }
+
+  function makeDraggable(el) {
+    let ox, oy;
+    el.addEventListener('mousedown', e => {
+      if (e.button !== 0) return;
+      e.stopPropagation();
+      ox = e.clientX - el.offsetLeft;
+      oy = e.clientY - el.offsetTop;
+      const onMove = (ev) => {
+        el.style.left = (ev.clientX - ox) + 'px';
+        el.style.top  = (ev.clientY - oy) + 'px';
+      };
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        // update state
+        const w = getWidget(el.id);
+        if (w) { w.x = parseInt(el.style.left); w.y = parseInt(el.style.top); }
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+  }
+
+  document.getElementById('canvas').addEventListener('click', () => deselectWidget());
+
+  // ── Widget selection & properties ──────────────────────────────────────
+  function selectWidget(id) {
+    deselectWidget();
+    selectedId = id;
+    document.getElementById(id)?.classList.add('selected');
+    const w = getWidget(id);
+    if (!w) return;
+    document.getElementById('propsEmpty').style.display = 'none';
+    document.getElementById('propsForm').style.display  = '';
+    document.getElementById('pTitle').value  = w.title || '';
+    document.getElementById('pSource').value = w.data_source || '';
+    document.getElementById('pMin').value    = w.min ?? 0;
+    document.getElementById('pMax').value    = w.max ?? 100;
+    document.getElementById('pColor').value  = w.color || '#00d4ff';
+    document.getElementById('pWidth').value  = w.width  || 120;
+    document.getElementById('pHeight').value = w.height || 80;
+  }
+
+  function deselectWidget() {
+    if (selectedId) document.getElementById(selectedId)?.classList.remove('selected');
+    selectedId = null;
+    document.getElementById('propsEmpty').style.display = '';
+    document.getElementById('propsForm').style.display  = 'none';
+  }
+
+  function updateProp(key, val) {
+    const w = getWidget(selectedId);
+    if (!w) return;
+    w[key] = (key === 'min' || key === 'max' || key === 'width' || key === 'height')
+      ? parseFloat(val) : val;
+    const el = document.getElementById(selectedId);
+    if (!el) return;
+    if (key === 'title') { const t = el.querySelector('.wgt-title'); if (t) t.textContent = val; }
+    if (key === 'color') {
+      el.style.borderColor = val;
+      const v = el.querySelector('.wgt-value'); if (v) v.style.color = val;
+    }
+    if (key === 'width')  el.style.width  = val + 'px';
+    if (key === 'height') el.style.height = val + 'px';
+    if (key === 'data_source') el.dataset.source = val;
+  }
+
+  function deleteSelected() {
+    if (!selectedId) return;
+    document.getElementById(selectedId)?.remove();
+    const arr = pages[currentPage].widgets;
+    const idx = arr.findIndex(w => w.id === selectedId);
+    if (idx > -1) arr.splice(idx, 1);
+    deselectWidget();
+  }
+
+  function getWidget(id) {
+    return pages[currentPage].widgets.find(w => w.id === id);
+  }
+
+  // ── Page management ────────────────────────────────────────────────────
+  function addPage() {
+    const name = 'Page ' + (pages.length + 1);
+    pages.push({ name, widgets: [] });
+    renderPageTabs();
+    switchPage(pages.length - 1);
+  }
+
+  function switchPage(idx) {
+    deselectWidget();
+    currentPage = idx;
+    document.getElementById('canvas').innerHTML = '';
+    widgetSeq = 0;
+    pages[idx].widgets.forEach(w => renderWidget(w));
+    renderPageTabs();
+  }
+
+  function renderPageTabs() {
+    const bar = document.getElementById('pageTabs');
+    bar.innerHTML = '';
+    pages.forEach((p, i) => {
+      const tab = document.createElement('span');
+      tab.className = 'page-tab' + (i === currentPage ? ' active' : '');
+      tab.textContent = p.name;
+      tab.addEventListener('click', () => switchPage(i));
+      bar.appendChild(tab);
+    });
+    const add = document.createElement('span');
+    add.className = 'add-page';
+    add.title = 'Add page';
+    add.textContent = '＋';
+    add.addEventListener('click', addPage);
+    bar.appendChild(add);
+  }
+
+  // ── Toolbar actions ────────────────────────────────────────────────────
+  function newScreen() {
+    if (!confirm('Clear all widgets on this page?')) return;
+    pages[currentPage].widgets = [];
+    document.getElementById('canvas').innerHTML = '';
+    widgetSeq = 0;
+  }
+
+  function saveLayout() {
+    const layout = { pages };
+    localStorage.setItem('hmi_layout', JSON.stringify(layout));
+    showToast('💾 Saved locally');
+  }
+
+  function previewLayout() {
+    window.open('/hmi/runtime', '_blank');
+  }
+
+  function deployLayout() {
+    const layout = { pages };
+    localStorage.setItem('hmi_layout', JSON.stringify(layout));
+    fetch('/api/hmi/deploy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(layout),
+    })
+    .then(r => r.json())
+    .then(d => showToast(d.ok ? '🚀 Deployed!' : '❌ Deploy failed'))
+    .catch(() => showToast('🚀 Saved locally (server offline)'));
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 2500);
+  }
+
+  // ── Load saved layout on startup ───────────────────────────────────────
+  window.addEventListener('load', () => {
+    const saved = localStorage.getItem('hmi_layout');
+    if (saved) {
+      try {
+        const layout = JSON.parse(saved);
+        if (layout.pages) {
+          pages = layout.pages;
+          renderPageTabs();
+          switchPage(0);
+        }
+      } catch (e) { /* ignore */ }
+    }
+  });
+
+  // ── Handle postMessage from parent iframe ──────────────────────────────
+  window.addEventListener('message', (e) => {
+    const cmd = e.data && e.data.cmd;
+    if (cmd === 'save')    saveLayout();
+    if (cmd === 'deploy')  deployLayout();
+    if (cmd === 'preview') previewLayout();
+    if (cmd === 'new')     newScreen();
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
