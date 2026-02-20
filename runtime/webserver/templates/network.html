@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Network — Minimal-PLC{% endblock %}
+
+{% block content %}
+<h1>Network</h1>
+
+<div class="card">
+    <h2>Network Settings</h2>
+    <table>
+        <tr><th>Setting</th><th>Value</th></tr>
+        <tr><td>Interface</td><td>{{ network.get('interface', 'eth0') }}</td></tr>
+        <tr><td>IP Address</td><td>{{ network.get('ip', 'DHCP') }}</td></tr>
+        <tr><td>Subnet Mask</td><td>{{ network.get('subnet', '255.255.255.0') }}</td></tr>
+        <tr><td>Gateway</td><td>{{ network.get('gateway', '') }}</td></tr>
+        <tr><td>DNS</td><td>{{ network.get('dns', '') }}</td></tr>
+    </table>
+</div>
+{% endblock %}
